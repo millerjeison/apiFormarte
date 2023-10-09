@@ -19,7 +19,7 @@ class CreateRespuestasTable extends Migration
             $table->integer('resppuntosn')->nullable();
             $table->json('resppropiedadesj')->nullable();
             $table->boolean('opprrespuestacorrectab');
-            $table->integer('opprvalorrespuestad');
+            $table->integer('opprvalorrespuestad')->nullable();
             $table->integer('opciordenn');
             $table->unsignedBigInteger('gradidn')->nullable();
             $table->string('gradnombrev')->nullable();

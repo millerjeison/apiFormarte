@@ -7,49 +7,72 @@ use App\Http\Requests\UpdateRespuestaPreguntaRequest;
 use App\Models\Pregunta;
 use App\Models\RespuestaPregunta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class RespuestaPreguntaController extends Controller
 {
-    public function registrarRespuesta(Request $request)
+    public function obtenerPreguntaIdsPorDificultad($asignaturaId, $dificultad)
     {
-        // Validación de la solicitud (puedes personalizarla según tus necesidades)
-        $request->validate([
-            'pregunta_id' => 'required|exists:preguntas,id',
-            'correcta' => 'required|boolean',
-        ]);
+        // Define un arreglo con los grados válidos
+        $gradosValidos = ['facil', 'intermedio', 'dificil'];
 
-        // Registrar la respuesta en la tabla respuestas_preguntas
-        RespuestaPregunta::create([
-            'pregunta_id' => $request->pregunta_id,
-            'correcta' => $request->correcta,
-        ]);
-
-        // Calcular la dificultad de la pregunta y actualizarla (simplificado)
-        $pregunta = Pregunta::find($request->pregunta_id);
-        $pregunta->dificultad = $this->calcularDificultad($pregunta);
-        $pregunta->save();
-
-        return response()->json(['message' => 'Respuesta registrada exitosamente.']);
-    }
-
-    // Función para calcular la dificultad de una pregunta (ejemplo simplificado)
-    private function calcularDificultad(Pregunta $pregunta)
-    {
-        $totalRespuestas = $pregunta->respuestas->count();
-        $respuestasCorrectas = $pregunta->respuestas->where('correcta', true)->count();
-
-        // Lógica de cálculo de dificultad (personalizada según tus necesidades)
-        if ($totalRespuestas > 0) {
-            $proporcionCorrectas = $respuestasCorrectas / $totalRespuestas;
-            if ($proporcionCorrectas >= 0.8) {
-                return 'Fácil';
-            } elseif ($proporcionCorrectas >= 0.5) {
-                return 'Regular';
-            } else {
-                return 'Difícil';
-            }
+        // Verifica que la $asignaturaId sea válida y $grado sea uno de los valores válidos
+        if (!is_numeric($asignaturaId) || !in_array($dificultad, $gradosValidos)) {
+            return response()->json(['error' => 'Parámetros inválidos'], 400);
         }
 
-        return 'Sin respuesta';
+        // Realiza la consulta para obtener el grado de dificultad de las preguntas
+        $preguntaIds = RespuestaPregunta::where('asignatura_id', $asignaturaId)
+            ->select('pregunta_id', DB::raw('SUM(resultado = 1) as respuestas_correctas, COUNT(*) as total_respuestas'))
+            ->groupBy('pregunta_id')
+            ->get();
+
+        // Filtra las pregunta_ids según el grado especificado
+        $preguntaIdsFiltrados = $preguntaIds->filter(function ($pregunta) use ($dificultad) {
+            $porcentajeCorrectas = ($pregunta->respuestas_correctas / $pregunta->total_respuestas) * 100;
+
+            if ($porcentajeCorrectas < 30) {
+                return $dificultad === 'dificil';
+            } elseif ($porcentajeCorrectas >= 30 && $porcentajeCorrectas < 70) {
+                return $dificultad === 'intermedio';
+            } else {
+                return $dificultad === 'facil';
+            }
+        })->pluck('pregunta_id');
+
+        return response()->json(['pregunta_ids' => $preguntaIdsFiltrados]);
     }
+    public function obtenerPreguntaIdsPorDificultadPorgrado($grado, $dificultad)
+    {
+        // Define un arreglo con los grados válidos
+        $gradosValidos = ['facil', 'intermedio', 'dificil'];
+
+        // Verifica que la $asignaturaId sea válida y $grado sea uno de los valores válidos
+        if (!is_numeric($grado) || !in_array($dificultad, $gradosValidos)) {
+            return response()->json(['error' => 'Parámetros inválidos'], 400);
+        }
+
+        // Realiza la consulta para obtener el grado de dificultad de las preguntas
+        $preguntaIds = RespuestaPregunta::where('grado_id', $grado)
+            ->select('pregunta_id', DB::raw('SUM(resultado = 1) as respuestas_correctas, COUNT(*) as total_respuestas'))
+            ->groupBy('pregunta_id')
+            ->get();
+
+        // Filtra las pregunta_ids según el grado especificado
+        $preguntaIdsFiltrados = $preguntaIds->filter(function ($pregunta) use ($dificultad) {
+            $porcentajeCorrectas = ($pregunta->respuestas_correctas / $pregunta->total_respuestas) * 100;
+
+            if ($porcentajeCorrectas < 30) {
+                return $dificultad === 'dificil';
+            } elseif ($porcentajeCorrectas >= 30 && $porcentajeCorrectas < 70) {
+                return $dificultad === 'intermedio';
+            } else {
+                return $dificultad === 'facil';
+            }
+        })->pluck('pregunta_id');
+
+        return response()->json(['pregunta_ids' => $preguntaIdsFiltrados]);
+    }
+
 }

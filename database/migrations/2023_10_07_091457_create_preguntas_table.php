@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('preguntas', function (Blueprint $table) {
             $table->id();
-            $table->string('pregtextov')->nullable();
+            $table->text('pregtextov')->nullable();
             $table->string('pregcomentariov')->nullable();
             $table->timestamp('pregfechacreaciont')->nullable();
             $table->string('pregautoriav')->nullable();
@@ -28,9 +28,10 @@ return new class extends Migration
             $table->string('pregpropiedadv')->nullable();
             $table->timestamp('pregfechamodificaciont')->nullable();
             $table->string('componente');
-            $table->string('tema');
+            $table->string('tema')->nullable();
             $table->string('competencia');
             $table->integer('areaidn');
+            $table->integer('asignatura_id');
             $table->string('area');
             $table->string('asignatura');
             $table->string('aprendizaje')->nullable();
@@ -49,7 +50,7 @@ return new class extends Migration
             $table->string('periodo')->nullable();
             $table->string('pregestructuraj')->nullable();
             $table->string('recunombrev')->nullable();
-            $table->string('recutexto')->nullable();
+            $table->text('recutexto')->nullable();
             $table->boolean('acierto');
             $table->timestamps();
         });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RespuestaPreguntaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PreguntaController;
@@ -36,10 +37,21 @@ Route::prefix('preguntas')->group(function () {
     Route::put('/{pregunta}/respuestas/{respuesta}', [PreguntaController::class, 'updateRespuesta']); // Actualizar una respuesta
     Route::delete('/{pregunta}/respuestas/{respuesta}', [PreguntaController::class, 'destroyRespuesta']); // Eliminar una respuesta
 
+/* 
+calcularDificultadPromedioPorGrado($gradoId)
+calcularDificultadPromedioPorAsignatura($asignaturaId)
+calcularDificultadPromedioYListadoPreguntas($gradoId, $asignaturaId)
 
+*/
 
 });
 
+// se calcula la dificultad.
+Route::prefix('calular_dificultad')->group(function () {
+    Route::post('/grado/{grado}',[RespuestaPreguntaController::class ,'calcularDificultadPromedioPorGrado']);
+    Route::post('/asignatura/{asignatura}',[RespuestaPreguntaController::class ,'calcularDificultadPromedioPorAsignatura']);
+    Route::post('/gardo_asignatura/{grado}/{asignatura}',[RespuestaPreguntaController::class ,'calcularDificultadPromedioYListadoPreguntas']);
+});
 
 // Rutas para respuestas
 Route::prefix('respuestas')->group(function () {
