@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAsignaturaRequest;
 use App\Http\Requests\UpdateAsignaturaRequest;
 use App\Models\Asignatura;
+use App\Models\Grado;
 
 class AsignaturaController extends Controller
 {
@@ -35,9 +36,12 @@ class AsignaturaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Asignatura $asignatura)
+    public function show($grado)
     {
-        //
+        $grado = Grado::where('value', $grado)->first();
+        $grado_id = $grado->id;
+        $asignaturas = Asignatura::where('grado_id', $grado_id)->get();
+        return response()->json(['response' => $asignaturas], 200);
     }
 
     /**

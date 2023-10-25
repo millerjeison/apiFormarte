@@ -10,5 +10,6 @@ class Asignatura extends Model
 
 
     protected $fillable = [
-        'value'
+        'value',
+        'grado_id'
    ];}

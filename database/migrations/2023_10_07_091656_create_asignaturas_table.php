@@ -14,7 +14,12 @@ return new class extends Migration
         Schema::create('asignaturas', function (Blueprint $table) {
             $table->id();
             $table->string('value');
+            $table->unsignedBigInteger('grado_id');
             $table->timestamps();
+
+
+            $table->foreign('grado_id')->references('id')->on('grados')->onDelete('cascade');
+
         });
     }
 

@@ -12,6 +12,9 @@ class CreateGradosTable extends Migration
             $table->id();
             $table->string('value');
             $table->timestamps();
+
+
+
         });
     }
 

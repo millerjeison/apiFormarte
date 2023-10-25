@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AsignaturaController;
 use App\Http\Controllers\RespuestaPreguntaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,4 +61,9 @@ Route::prefix('respuestas')->group(function () {
     Route::get('/{respuesta}', [RespuestaController::class, 'show']); // Mostrar una respuesta específica
     Route::put('/{respuesta}', [RespuestaController::class, 'update']); // Actualizar una respuesta
     Route::delete('/{respuesta}', [RespuestaController::class, 'destroy']); // Eliminar una respuesta
+});
+
+
+Route::prefix('asignatura')->group(function () {
+    Route::get('/{grado_id}', [AsignaturaController::class, 'show']); // Listas de asignaturas
 });

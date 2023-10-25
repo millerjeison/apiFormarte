@@ -46,7 +46,11 @@ class PreguntaController extends Controller
 
         // Validar y obtener el ID de la asignatura (si es necesario)
         $asignatura_nombre = $request->asignatura;
-        $asignatura_id = Asignatura::firstOrCreate(['value' => $asignatura_nombre])->id;
+        $asignatura_id = Asignatura::firstOrCreate([
+            'value' => $asignatura_nombre,
+            'grado_id' => $grado_id
+            
+            ])->id;
 
         // Agregar los datos de relación
         $data['gradidn'] = $grado_id;
