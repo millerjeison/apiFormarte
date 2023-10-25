@@ -11,7 +11,7 @@ class CreateRespuestasTable extends Migration
         Schema::create('respuestas', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('pregunta_id');
-            $table->string('resptextov')->nullable();
+            $table->text('resptextov')->nullable();
             $table->string('responidentificadorv');
             $table->string('respmaterialrefuerzov')->nullable();
             $table->string('respdiagnosticov')->nullable();

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('pregautoriav')->nullable();
             $table->integer('pregyear');
             $table->boolean('pregcorrecta');
-            $table->string('pregmaterialrefuerzov')->nullable();
+            $table->text('pregmaterialrefuerzov')->nullable();
             $table->time('pregtiempon')->nullable();
             $table->string('pregautoriacelularv')->nullable();
             $table->string('pregfuentev')->nullable();
