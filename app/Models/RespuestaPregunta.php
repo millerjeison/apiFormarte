@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class RespuestaPregunta extends Model
 {
+
     protected $fillable = [
         'pregunta_id',
-        'resultado',
+        'correcta',
         'grado_id',
         'asignatura_id'
     ];
@@ -18,4 +19,5 @@ class RespuestaPregunta extends Model
     {
         return $this->belongsTo('App\Pregunta');
     }
+//U66#I38W!O
 }

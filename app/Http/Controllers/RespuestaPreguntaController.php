@@ -12,8 +12,33 @@ use Illuminate\Support\Facades\DB;
 
 class RespuestaPreguntaController extends Controller
 {
+
+
+
+
+
+    public function createRespondedAnswers(Request $request)
+    {
+
+
+        // Validar los datos del request
+        $validatedData = $request->validate([
+            'pregunta_id' => 'required|exists:preguntas,id',
+            'correcta' => 'required|boolean',
+            'grado_id' => 'required|exists:grados,id', // Asumiendo que hay una tabla grados
+            'asignatura_id' => 'required|exists:asignaturas,id' // Asumiendo que hay una tabla asignaturas
+        ]);
+
+        $respuesta = RespuestaPregunta::create($request->all());
+
+
+        return response()->json(['respuesta' => $respuesta], 201);
+
+    }
+
     public function obtenerPreguntaIdsPorDificultad($asignaturaId, $dificultad)
     {
+
         // Define un arreglo con los grados válidos
         $gradosValidos = ['facil', 'intermedio', 'dificil'];
 
@@ -30,6 +55,7 @@ class RespuestaPreguntaController extends Controller
 
         // Filtra las pregunta_ids según el grado especificado
         $preguntaIdsFiltrados = $preguntaIds->filter(function ($pregunta) use ($dificultad) {
+
             $porcentajeCorrectas = ($pregunta->respuestas_correctas / $pregunta->total_respuestas) * 100;
 
             if ($porcentajeCorrectas < 30) {
@@ -39,12 +65,17 @@ class RespuestaPreguntaController extends Controller
             } else {
                 return $dificultad === 'facil';
             }
+
         })->pluck('pregunta_id');
 
         return response()->json(['pregunta_ids' => $preguntaIdsFiltrados]);
+
     }
+
+
     public function obtenerPreguntaIdsPorDificultadPorgrado($grado, $dificultad)
     {
+
         // Define un arreglo con los grados válidos
         $gradosValidos = ['facil', 'intermedio', 'dificil'];
 
@@ -62,7 +93,6 @@ class RespuestaPreguntaController extends Controller
         // Filtra las pregunta_ids según el grado especificado
         $preguntaIdsFiltrados = $preguntaIds->filter(function ($pregunta) use ($dificultad) {
             $porcentajeCorrectas = ($pregunta->respuestas_correctas / $pregunta->total_respuestas) * 100;
-
             if ($porcentajeCorrectas < 30) {
                 return $dificultad === 'dificil';
             } elseif ($porcentajeCorrectas >= 30 && $porcentajeCorrectas < 70) {

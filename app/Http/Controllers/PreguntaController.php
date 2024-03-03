@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePreguntaRequest;
 use App\Models\Asignatura;
 use App\Models\Estado;
 use App\Models\Pregunta;
+use App\Models\preguntasMalas;
 use App\Models\Respuesta;
 use App\Models\Grado;
 use App\Models\Area;
@@ -49,8 +50,8 @@ class PreguntaController extends Controller
         $asignatura_id = Asignatura::firstOrCreate([
             'value' => $asignatura_nombre,
             'grado_id' => $grado_id
-            
-            ])->id;
+
+        ])->id;
 
         // Agregar los datos de relación
         $data['gradidn'] = $grado_id;
@@ -126,25 +127,94 @@ class PreguntaController extends Controller
 
 
 
-    public function getPreguntasConRespuestasPorGrado($grado)
+
+    public function getPreguntasConRespuestasPorGrado($grado,$cantidadPreguntas)
     {
-        $preguntas = Pregunta::where('grado', $grado)
+        // Obtén el ID del grado o crea uno si no existe
+        $idGrado = Grado::firstOrNew(['value' => $grado])->id;
+
+        // Obtén todas las asignaturas para el grado dado
+        $asignaturas = Asignatura::where('grado_id', $idGrado)->get();
+
+        $preguntasPorAsignatura = $cantidadPreguntas ; // Número de preguntas por asignatura
+
+        $preguntas = collect(); // Creamos una colección vacía para almacenar preguntas
+
+        // Iteramos a través de las asignaturas para obtener preguntas equitativamente
+        foreach ($asignaturas as $asignatura) {
+            // Obtenemos las preguntas para esta asignatura
+            $preguntasAsignatura = Pregunta::where('asignatura_id', $asignatura->id)
+            ->whereNotIn('id', preguntasMalas::pluck('id_pregunta')) // Excluye las preguntas malas
+
+                ->inRandomOrder()
+                ->limit($preguntasPorAsignatura)
+                ->with('respuestas')
+                ->get();
+
+            // Agregamos las preguntas de esta asignatura a la colección principal
+            $preguntas = $preguntas->concat($preguntasAsignatura);
+        }
+
+        // Ordenar las preguntas por asignatura
+        $preguntas = $preguntas->sortBy('asignatura.value');
+
+        return response()->json(['preguntas' => $preguntas], 200);
+    }
+
+
+    public function getPreguntasConRespuestasPorAsignatura($asignatura,$cantidadPreguntas)
+    {
+        $preguntas = Pregunta::where('asignatura', $asignatura)
+        ->whereNotIn('id', preguntasMalas::pluck('id_pregunta')) // Excluye las preguntas malas
+
             ->inRandomOrder()
-            ->limit(10) // Limita a 10 preguntas
+            ->limit($cantidadPreguntas) 
             ->with('respuestas') // Carga las respuestas relacionadas
             ->get();
 
         return response()->json(['preguntas' => $preguntas], 200);
     }
 
-    public function getPreguntasConRespuestasPorGradoYAsignatura($grado, $asignatura)
+    public function getPreguntasConRespuestasPorGradoYAsignatura($grado, $asignatura,$cantidadPreguntas)
     {
         $preguntas = Pregunta::where('grado', $grado)
+        ->whereNotIn('id', preguntasMalas::pluck('id_pregunta')) // Excluye las preguntas malas
+
             ->where('asignatura', $asignatura)
             ->inRandomOrder()
-            ->limit(10) // Limita a 10 preguntas
+            ->limit($cantidadPreguntas??10) 
             ->with('respuestas') // Carga las respuestas relacionadas
             ->get();
         return response()->json(['preguntas' => $preguntas], 200);
+    }
+
+
+
+    public function eliminarPreguntasRepetidas()
+    {
+        // Obtén todas las preguntas agrupadas por su texto y respuesta
+        $preguntasRepetidas = Pregunta::select('pregtextov')
+            ->groupBy('pregtextov')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+            $totalPreguntasRepetidas = $preguntasRepetidas->count();
+            var_dump($totalPreguntasRepetidas);
+
+        // foreach ($preguntasRepetidas as $preguntaRepetida) {
+        //     // Encuentra todas las preguntas con el mismo texto
+        //     $preguntas = Pregunta::where('pregtextov', $preguntaRepetida->pregtextov)->get();
+    
+
+        //     // Elimina las respuestas relacionadas
+        //     foreach ($preguntas as $pregunta) {
+        //         // Respuesta::where('pregunta_id', $pregunta->id)->delete();
+        //     }
+
+        //     // Elimina las preguntas repetidas
+        //     // Pregunta::where('pregtextov', $preguntaRepetida->pregtextov)->delete();
+        // }
+
+        return "Preguntas repetidas eliminadas junto con sus respuestas.";
     }
 }

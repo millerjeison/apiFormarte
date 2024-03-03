@@ -14,11 +14,11 @@ return new class extends Migration
             $table->unsignedBigInteger('grado_id');
             $table->unsignedBigInteger('asignatura_id');
             $table->boolean('correcta');
-            $table->timestamps();
-
             $table->foreign('pregunta_id')->references('id')->on('preguntas')->onDelete('cascade');
             $table->foreign('grado_id')->references('id')->on('grados')->onDelete('cascade');
             $table->foreign('asignatura_id')->references('id')->on('asignaturas')->onDelete('cascade');
+            $table->timestamps();
+
         });
     }
 

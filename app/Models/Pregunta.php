@@ -10,7 +10,6 @@ class Pregunta extends Model
     protected $fillable = [
         'pregtextov',
         'pregcomentariov',
-
         'pregautoriav',
         'pregyear',
         'pregcorrecta',
@@ -45,6 +44,10 @@ class Pregunta extends Model
         return $this->belongsTo(Area::class, 'areaidn', 'areaidn');
     }
 
+    public function asignatura()
+    {
+        return $this->belongsTo(Asignatura::class, 'asignatura_id');
+    }
     public function respuestas()
     {
         return $this->hasMany(Respuesta::class, 'pregunta_id');
